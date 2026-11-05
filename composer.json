@@ -1,0 +1,17 @@
+{
+    "name": "anjlalxn/aa_security",
+    "description": "AA Security",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Anjlalxn\\AaSecurity\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "crimsoncrows",
+            "email": "anjelaalexene@gmail.com"
+        }
+    ],
+    "require": {}
+}
