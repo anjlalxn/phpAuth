@@ -54,7 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Register</title>
-
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -68,6 +71,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         crossorigin="anonymous">
 </head>
 <body>
+<div class="px-4 py-5 my-5 text-center">
+    <img
+            class="d-block mx-auto mb-4"
+            src="https://i.pinimg.com/736x/37/bc/8c/37bc8ce0a09064470f0a5968bf2dd73e.jpg"
+            alt=""
+            width="72"
+            height="72">
+
+    <h1 class="fs-4xl fw-bold fg-emphasis-inverse">Hello</h1>
+
+    <div class="lg:col-6 mx-auto">
+        <p class="fs-lg fw-light mb-4">Got an account? Head to the login page</p>
+
+        <div class="d-grid gap-2 sm:d-flex sm:justify-content-center">
+            <a href="login.php" class="btn-outline theme-secondary btn-lg px-4">
+                Login
+            </a>
+
+        </div>
+    </div>
+
+
+
+</div>
 
 <div class="container mt-5">
     <h1 class="fs-4xl fw-bold fg-emphasis-inverse">Get Started</h1>
