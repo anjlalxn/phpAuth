@@ -1,16 +1,29 @@
 <?php
 require_once 'config.php';
-session_start();
+require_once 'session_config.php';   // replaces the bare session_start()
+
 $errors = [];
 $name   = '';
 $email  = '';
 
-if(isset($_SESSION['user_id'])){
+if (isset($_SESSION['user_id'])) {
     header('Location: home.php');
     exit;
 }
 
+// CSRF 1: generate once per session
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // CSRF 3: verify on every POST, before anything else
+    if (!hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
+        http_response_code(419);
+        exit('Invalid CSRF token');
+    }
+
     $user_pattern = '/^[a-zA-Z0-9_]{3,16}$/';
 
     $name  = trim($_POST['name'] ?? '');
@@ -31,9 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Only touch the database if everything above passed
     if (empty($errors)) {
-        $hash = password_hash($pass, PASSWORD_DEFAULT);
+        $hash = password_hash($pass, PASSWORD_DEFAULT, ['cost' => 12]);
         $stmt = $pdo->prepare(
-            'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)'
+                'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)'
         );
 
         try {
@@ -66,14 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap"
-        rel="stylesheet">
+            href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap"
+            rel="stylesheet">
 
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe"
-        crossorigin="anonymous">
+            href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe"
+            crossorigin="anonymous">
 </head>
 <body>
 <div class="px-4 py-5 my-5 text-center">
@@ -93,12 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="login.php" class="btn-outline theme-secondary btn-lg px-4">
                 Login
             </a>
-
         </div>
     </div>
-
-
-
 </div>
 
 <div class="container mt-5">
@@ -114,39 +123,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form action="register.php" method="post" class="p-4 md:p-5 border rounded-3 bg-1">
+
+        <!-- CSRF 2: token in the form -->
+        <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
+
         <div class="form-floating mb-3">
             <label for="floatingEmail">Email address</label>
             <input
-                type="email"
-                name="email"
-                class="form-control"
-                id="floatingEmail"
-                placeholder="name@example.com"
-                value="<?= htmlspecialchars($email) ?>"
-                required>
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    id="floatingEmail"
+                    placeholder="name@example.com"
+                    value="<?= htmlspecialchars($email) ?>"
+                    required>
         </div>
 
         <div class="form-floating mb-3">
             <label for="floatingUsername">Username</label>
             <input
-                type="text"
-                name="name"
-                class="form-control"
-                id="floatingUsername"
-                placeholder="example_username"
-                value="<?= htmlspecialchars($name) ?>"
-                required>
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    id="floatingUsername"
+                    placeholder="example_username"
+                    value="<?= htmlspecialchars($name) ?>"
+                    required>
         </div>
 
         <div class="form-floating mb-3">
             <label for="floatingPassword">Password</label>
             <input
-                type="password"
-                name="password"
-                class="form-control"
-                id="floatingPassword"
-                placeholder="Password"
-                required>
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    id="floatingPassword"
+                    placeholder="Password"
+                    required>
         </div>
 
         <button class="w-100 btn-solid theme-primary btn-lg" type="submit">
@@ -158,10 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script
-    type="module"
-    src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL"
-    crossorigin="anonymous"></script>
+        type="module"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL"
+        crossorigin="anonymous"></script>
 
 </body>
 </html>

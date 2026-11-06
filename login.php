@@ -5,12 +5,24 @@ require_once 'session_config.php';
 $errors = [];
 $email  = '';
 
-if(isset($_SESSION['user_id'])){
+if (isset($_SESSION['user_id'])) {
     header('Location: home.php');
     exit;
 }
 
+// CSRF 1: generate once per session
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // CSRF 3: verify on every POST, before doing anything else
+    if (!hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
+        http_response_code(419);
+        exit('Invalid CSRF token');
+    }
+
     $email = trim($_POST['email'] ?? '');
     $pass  = $_POST['password'] ?? '';
 
@@ -26,9 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($pass, $user['password_hash'])) {
+
+            // Rehash: upgrade the stored hash if it's outdated
+            if (password_needs_rehash($user['password_hash'], PASSWORD_DEFAULT, ['cost' => 12])) {
+                $newHash = password_hash($pass, PASSWORD_DEFAULT, ['cost' => 12]);
+                $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+                        ->execute([$newHash, $user['id']]);
+            }
+
             session_regenerate_id(true);
+            unset($_SESSION['csrf']);          // fresh token for the logged-in session
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['name'] = $user['name'];
+            $_SESSION['name']    = $user['name'];
             $_SESSION['role']    = $user['role'];
             header('Location: home.php');
             exit;
@@ -38,8 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // so attackers can't tell which one was incorrect
         $errors[] = 'Wrong email or password.';
     }
-
-
 }
 ?>
 
@@ -99,6 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form action="login.php" method="post" class="p-4 md:p-5 border rounded-3 bg-1">
+
+        <!-- CSRF 2: token in the form -->
+        <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
+
         <div class="form-floating mb-3">
             <label for="floatingInput">Email address</label>
             <input
