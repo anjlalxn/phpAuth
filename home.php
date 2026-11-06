@@ -66,7 +66,7 @@ $current_user = $_SESSION['name'] ?? 'User';
 <!-- Navbar -->
 <nav class="navbar navbar-expand-md bg-body-tertiary sticky-top border-bottom">
     <div class="container">
-        <a class="navbar-brand fw-semibold" href="#">Aperture</a>
+        <a class="navbar-brand fw-semibold" href="#">Apple</a>
 
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navMenu"
@@ -96,7 +96,7 @@ $current_user = $_SESSION['name'] ?? 'User';
     <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary">
         <div class="col-md-6 p-lg-5 mx-auto my-5">
             <h1 class="display-3 fw-bold">Welcome, <?= htmlspecialchars($current_user) ?></h1>
-            <h3 class="fw-normal text-body-secondary mb-3">Build anything you want with Aperture</h3>
+            <h3 class="fw-normal text-body-secondary mb-3">Welcome to your admin dashboard</h3>
             <div class="d-flex gap-3 justify-content-center lead fw-normal">
                 <a class="btn btn-outline-secondary" href="#">Learn more</a>
                 <a class="btn btn-primary" href="#">Buy</a>
