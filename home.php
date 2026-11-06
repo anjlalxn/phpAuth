@@ -1,16 +1,19 @@
 <?php
 require_once 'config.php';
-session_start();
+require 'auth_check.php';
 
 if (isset($_POST['logout'])) {
     $_SESSION = [];
+
+    // Delete the session cookie in the browser too
+    if (ini_get('session.use_cookies')) {
+        $p = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+    }
+
     session_destroy();
     header('Location: login.php');
-    exit;
-}
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: restricted.php');
     exit;
 }
 

@@ -1,9 +1,14 @@
 <?php
 require_once 'config.php';
-session_start();
+require_once 'session_config.php';
 
 $errors = [];
 $email  = '';
+
+if(isset($_SESSION['user_id'])){
+    header('Location: home.php');
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -33,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // so attackers can't tell which one was incorrect
         $errors[] = 'Wrong email or password.';
     }
+
+
 }
 ?>
 

@@ -1,9 +1,14 @@
 <?php
 require_once 'config.php';
-
+session_start();
 $errors = [];
 $name   = '';
 $email  = '';
+
+if(isset($_SESSION['user_id'])){
+    header('Location: home.php');
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_pattern = '/^[a-zA-Z0-9_]{3,16}$/';
